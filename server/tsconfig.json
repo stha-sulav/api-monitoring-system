@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    /* Target Options */
+    "target": "ES2022" /* Output modern JavaScript optimized for Node.js 18+ */,
+    "module": "NodeNext" /* Required for modern Node.js and third-party ESM/CommonJS hybrid packages */,
+    "moduleResolution": "NodeNext" /* Aligns with NodeNext module parsing rules */,
+
+    /* Directories */
+    "rootDir": "./src" /* Points to your source files */,
+    "outDir": "./dist" /* Where compiled JavaScript files go for production */,
+
+    /* Interop & Security Options */
+    "esModuleInterop": true /* Crucial for importing CommonJS modules like 'jsonwebtoken', 'cors', and 'amqplib' smoothly */,
+    "allowSyntheticDefaultImports": true /* Permits default imports from modules with no default export */,
+    "forceConsistentCasingInFileNames": true /* Prevents cross-platform file import casing bugs */,
+
+    /* Strict Type-Checking (Highly Recommended) */
+    "strict": true /* Enables all strict type-checking rules */,
+    "noImplicitAny": true /* Forces explicit typing instead of defaulting to 'any' */,
+    "strictNullChecks": true /* Ensures variables are explicitly checked for null/undefined */,
+    "strictFunctionTypes": true /* Ensures function parameters match their definitions exactly */,
+    "noImplicitThis": true /* Raises an error when 'this' expression has an implied 'any' type */,
+    "alwaysStrict": true /* Parses files in ECMAScript strict mode and emits "use strict" */,
+
+    /* Code Quality Checks */
+    "noUnusedLocals": true /* Reports errors on unused local variables */,
+    "noUnusedParameters": true /* Reports errors on unused function parameters */,
+    "noImplicitReturns": true /* Ensures all code paths in a function return a value */,
+    "noFallthroughCasesInSwitch": true /* Prevents accidental fall-through bugs in switch statements */,
+
+    /* Advanced Diagnostics */
+    "skipLibCheck": true /* Skips type checking of declaration files (drastically speeds up compilation with huge packages like mongoose) */
+  },
+  "include": [
+    "src/**/*"
+  ] /* Restricts compilation exclusively to your src directory */,
+  "exclude": [
+    "node_modules",
+    "dist"
+  ] /* Explicitly ignores your dependencies and output builds */
+}
