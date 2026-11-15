@@ -9,14 +9,14 @@ const config = {
 
   // MongoDb
   mongo: {
-    uri: process.env.MONGO_URI || "mongo://localhost:27017/api_monitoring",
+    uri: process.env.MONGO_URI || "mongodb://localhost:27017/api_monitoring",
     dbName: process.env.MONGO_DB_NAME || "api_monitoring",
   },
 
   // postgresql
   postgres: {
     host: process.env.PG_HOST || "localhost",
-    port: parseInt(process.env.PORT || "5432", 10),
+    port: parseInt(process.env.PG_PORT || "5432", 10),
     database: process.env.PG_DATABASE || "api_monitoring",
     user: process.env.PG_USER || "postgres",
     password: process.env.PG_PASSWORD || "postgres",
@@ -24,7 +24,9 @@ const config = {
 
   // Rabbitmq
   rabbitmq: {
-    url: process.env.RABBITMQ_URL || "amqp://localhost:5672",
+    url:
+      process.env.RABBITMQ_URL ||
+      "amqp://user:password@localhost:5672/api_monitoring",
     queue: process.env.RABBITMQ_QUEUE || "api_hits",
     publisherConfirms:
       process.env.RABBITMQ_PUBLISHER_CONFIRMS === "true" || false, // MSGS LOST

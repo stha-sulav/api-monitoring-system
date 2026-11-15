@@ -1,7 +1,7 @@
-import { model, Schema } from "mongoose";
-import SecurityUtils from "../../utils/security.utils";
-import { USER_ROLES } from "../../constants/security.constant";
 import bcrypt from "bcryptjs";
+import { model, Schema } from "mongoose";
+import { USER_ROLES } from "../../constants/security.constant";
+import SecurityUtils from "../../utils/security.utils";
 
 const userSchema = new Schema(
   {
@@ -12,9 +12,7 @@ const userSchema = new Schema(
       trim: true,
       minLength: 3,
       validate: {
-        validator: function (userName) {
-          return /^[a-zA-Z0-9_-]+$/.test(userName);
-        },
+        validator: (userName) => /^[a-zA-Z0-9_-]+$/.test(userName),
         message: "Please enter a valid username",
       },
     },
@@ -25,9 +23,7 @@ const userSchema = new Schema(
       trim: true,
       lowercase: true,
       validate: {
-        validator: function (email) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        },
+        validator: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
         message: "Please enter a valid email",
       },
     },
@@ -43,7 +39,7 @@ const userSchema = new Schema(
           }
           return true;
         },
-        message: function (props: any) {
+        message: (props: any) => {
           const password = props.value;
           if (password) {
             const validation = SecurityUtils.validatePassword(password);
@@ -61,7 +57,7 @@ const userSchema = new Schema(
     clientId: {
       type: Schema.Types.ObjectId,
       ref: "Client",
-      required: function () {
+      required: function (): boolean {
         return this.role !== USER_ROLES.SUPER_ADMIN;
       },
     },
