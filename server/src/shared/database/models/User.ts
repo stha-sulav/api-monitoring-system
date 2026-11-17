@@ -1,9 +1,27 @@
 import bcrypt from "bcryptjs";
-import { model, Schema } from "mongoose";
-import { USER_ROLES } from "../../constants/security.constant";
+import { Document, model, ObjectId, Schema, ValidatorProps } from "mongoose";
+import { USER_ROLES } from "../../constants/shared.constant";
 import SecurityUtils from "../../utils/security.utils";
 
-const userSchema = new Schema(
+export interface UserPermissionType {
+  canCreateApiKeys: boolean;
+  canManageUsers: boolean;
+  canViewAnalytics: boolean;
+  canExportData: boolean;
+}
+export interface UserType extends Document {
+  username: string;
+  email: string;
+  password: string;
+  role: USER_ROLES;
+  clientId: ObjectId;
+  isActive: boolean;
+  permissions: UserPermissionType;
+  createdAt: Date;
+  updatredAt: Date;
+}
+
+const userSchema = new Schema<UserType>(
   {
     username: {
       type: String,
@@ -32,20 +50,12 @@ const userSchema = new Schema(
       required: true,
       minlength: 6,
       validate: {
-        validator: function (password: string) {
-          if (this.isModified && password) {
-            const validation = SecurityUtils.validatePassword(password);
-            return validation.success;
-          }
-          return true;
+        validator: (password: string) => {
+          return SecurityUtils.validatePassword(password).success;
         },
-        message: (props: any) => {
-          const password = props.value;
-          if (password) {
-            const validation = SecurityUtils.validatePassword(password);
-            return validation.errors.join(". ");
-          }
-          return "Validation Failed";
+        message: (props: ValidatorProps) => {
+          const validation = SecurityUtils.validatePassword(props.value);
+          return validation.errors.join(". ");
         },
       },
     },

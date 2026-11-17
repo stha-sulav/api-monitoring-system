@@ -5,15 +5,24 @@ import express, {
   type Response,
 } from "express";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import errorHandler from "./shared/middleware/errorHandler";
 import ApiResponse from "./shared/utils/apiResponse";
 import logger from "./shared/utils/logger";
 
+import authRouter from "./services/auth/routes/auth.router";
+
 function createApp() {
   const app = express();
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: true,
+      credentials: true,
+    }),
+  );
   app.use(helmet());
+  app.use(cookieParser());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -45,6 +54,8 @@ function createApp() {
       .status(200)
       .json(ApiResponse.success({ message: "Api Monitoring Service" }));
   });
+
+  app.use("/api/auth", authRouter);
 
   //   error middlewares
   app.use(errorHandler);

@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
+import { NODE_ENVIRONMENT } from "../constants/shared.constant";
 
 dotenv.config();
 
 const config = {
   // Server
-  node_env: process.env.NODE_ENV || "development",
+  node_env: process.env.NODE_ENV || NODE_ENVIRONMENT.development,
   port: parseInt(process.env.PORT || "5000", 10),
 
   // MongoDb
