@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
-import { NODE_ENVIRONMENT } from "../constants/shared.constant";
+import { APP_ENVIRONMENT } from "../constants/shared.constant";
 
 dotenv.config();
 
 const config = {
   // Server
-  node_env: process.env.NODE_ENV || NODE_ENVIRONMENT.development,
+  node_env: process.env.NODE_ENV || APP_ENVIRONMENT.DEVELOPMENT,
   port: parseInt(process.env.PORT || "5000", 10),
 
   // MongoDb
@@ -52,8 +52,9 @@ const config = {
   // Cookie
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === APP_ENVIRONMENT.PRODUCTION,
     expiresIn: 24 * 60 * 60 * 1000,
+    sameSite: "strict",
   },
 };
 

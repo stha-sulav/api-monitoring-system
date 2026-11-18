@@ -15,7 +15,7 @@ function authorize(allowedRoles: USER_ROLES[] = []) {
         return next();
       }
 
-      if (!allowedRoles.includes(req.user.roles)) {
+      if (!allowedRoles.includes(req.user.role)) {
         return res.status(403).json(
           ApiResponse.error({
             message: "Insufficient permission",

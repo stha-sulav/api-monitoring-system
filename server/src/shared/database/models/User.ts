@@ -111,5 +111,5 @@ userSchema.pre("save", async function () {
 userSchema.index({ clientId: 1, isActive: 1 });
 userSchema.index({ role: 1 });
 
-const User = model("User", userSchema);
+const User = model<UserType>("User", userSchema);
 export default User;

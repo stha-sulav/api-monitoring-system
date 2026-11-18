@@ -1,5 +1,5 @@
-import type { HydratedDocument, Model, ObjectId } from "mongoose";
-import { CreateDTO, IBaseAuthRepository } from "../types/auth.types";
+import type { HydratedDocument, Model } from "mongoose";
+import { CreateDTO, IBaseAuthRepository } from "../auth.types";
 import { UserType } from "../../../shared/database/models/User";
 import { USER_ROLES } from "../../../shared/constants/shared.constant";
 import logger from "../../../shared/utils/logger";
@@ -36,7 +36,7 @@ export default class MongoUserRepository implements IBaseAuthRepository<UserType
     }
   }
 
-  async findById(id: ObjectId): Promise<UserType | null> {
+  async findById(id: string): Promise<UserType | null> {
     try {
       const user = await this.model.findById(id);
       return user;

@@ -33,11 +33,6 @@ export enum HTTP_VERB {
   HEAD,
 }
 
-export enum NODE_ENVIRONMENT {
-  "production",
-  "development",
-}
-
 export enum ERRORS {
   UnhandeledError,
   ValidationError,
