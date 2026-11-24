@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
-import { Document, model, ObjectId, Schema, ValidatorProps } from "mongoose";
+import type { HydratedDocument } from "mongoose";
+import { model, Schema, type Types, type ValidatorProps } from "mongoose";
 import { USER_ROLES } from "../../constants/shared.constant";
 import SecurityUtils from "../../utils/security.utils";
 
@@ -9,17 +10,24 @@ export interface UserPermissionType {
   canViewAnalytics: boolean;
   canExportData: boolean;
 }
-export interface UserType extends Document {
+
+/**
+ * Plain data shape stored in MongoDB.
+ * Use `UserDocument` when you need a hydrated Mongoose instance.
+ */
+export interface UserType {
   username: string;
   email: string;
   password: string;
   role: USER_ROLES;
-  clientId: ObjectId;
+  clientId?: Types.ObjectId;
   isActive: boolean;
   permissions: UserPermissionType;
   createdAt: Date;
-  updatredAt: Date;
+  updatedAt: Date;
 }
+
+export type UserDocument = HydratedDocument<UserType>;
 
 const userSchema = new Schema<UserType>(
   {

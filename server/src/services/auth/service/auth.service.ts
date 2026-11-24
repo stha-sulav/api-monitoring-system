@@ -1,11 +1,16 @@
-import jwt, { SignOptions } from "jsonwebtoken";
-import { UserType } from "../../../shared/database/models/User";
+import jwt, { type SignOptions } from "jsonwebtoken";
+import type {
+  UserDocument,
+  UserType,
+} from "../../../shared/database/models/User";
 import AppError from "../../../shared/utils/AppError";
 import config from "../../../shared/config";
 import logger from "../../../shared/utils/logger";
-import MongoUserRepository from "../repository/user.repository";
-import { UserLoginType, UserRegistrationType } from "../schemas/user.schema";
+import type MongoUserRepository from "../repository/user.repository";
+import type { UserLoginType, UserRegistrationType } from "../schemas/user.schema";
 import bcrypt from "bcryptjs";
+import { USER_ROLES } from "../../../shared/constants/shared.constant";
+import type { CreateDTO, JwtPayload, UserResponse } from "../auth.types";
 
 export class AuthService {
   private userRepository: MongoUserRepository;
@@ -17,10 +22,10 @@ export class AuthService {
     this.userRepository = userRepository;
   }
 
-  private generateToken(user: UserType) {
+  private generateToken(user: UserDocument) {
     const { _id, email, username, role, clientId } = user;
 
-    const payload = {
+    const payload: JwtPayload = {
       userId: _id,
       email,
       username,
@@ -33,8 +38,8 @@ export class AuthService {
     });
   }
 
-  private formatUserResponse(user: UserType) {
-    const { password, ...cleanUserObj } = user;
+  private formatUserResponse(user: UserDocument): UserResponse {
+    const { password: _password, ...cleanUserObj } = user;
     return cleanUserObj;
   }
 
@@ -45,7 +50,7 @@ export class AuthService {
     return bcrypt.compare(enteredPassword, hashedPassword);
   }
 
-  async onboardSuperAdmin(superAdminData: any) {
+  async onboardSuperAdmin(superAdminData: CreateDTO<UserType>) {
     try {
       const existingUsers = await this.userRepository.findAll();
 
@@ -66,6 +71,21 @@ export class AuthService {
       return { user: this.formatUserResponse(user), token };
     } catch (error) {
       logger.error("Error onboarding Super Admin", error);
+      throw error;
+    }
+  }
+
+  async checkSuperAdminPermission(userId: string) {
+    try {
+      const user = await this.userRepository.findById(userId);
+
+      if (!user) {
+        throw new AppError({ message: "User Not Found", statusCode: 404 });
+      }
+
+      return user.role === USER_ROLES.SUPER_ADMIN;
+    } catch (error) {
+      logger.error("Error checking super admin: ", error);
       throw error;
     }
   }
@@ -121,7 +141,7 @@ export class AuthService {
 
       if (!user.isActive) {
         throw new AppError({
-          message: "Accout is not active.",
+          message: "Account is not active.",
           statusCode: 403,
         });
       }

@@ -1,11 +1,67 @@
-import { model, Schema } from "mongoose";
+import type { HydratedDocument, Model } from "mongoose";
+import { model, Schema, type Types } from "mongoose";
 import { APP_ENVIRONMENT } from "../../constants/shared.constant";
+
+export interface ApiKeyPermission {
+  canIngest?: boolean;
+  canReadAnalytics?: boolean;
+  allowedServices: string[];
+}
+
+export interface ApiKeySecurity {
+  allowedIPs: string[];
+  allowedOrigins: string[];
+  lastRotated?: Date;
+  rotationWarningDays?: number;
+}
+
+export interface ApiKeyMetadata {
+  createdBy: Types.ObjectId;
+  purpose: string;
+  tags: string[];
+}
+
+/**
+ * Plain data shape stored in MongoDB.
+ * Use `ApiKeyDocument` when you need a hydrated Mongoose instance.
+ */
+export interface ApiKeyType {
+  keyId: string;
+  keyValue: string;
+  clientId: Types.ObjectId;
+  name: string;
+  description?: string;
+  environment?: APP_ENVIRONMENT;
+  isActive?: boolean;
+  permissions: ApiKeyPermission;
+  security: ApiKeySecurity;
+  expiresAt?: Date;
+  metadata: ApiKeyMetadata;
+  createdBy: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ApiKeyInstanceMethods {
+  isExpired(): boolean;
+}
+
+/** Fields accepted when creating an API key; timestamps are managed by Mongoose. */
+export type CreateApiKeyInput = Omit<ApiKeyType, "createdAt" | "updatedAt">;
+
+export type ApiKeyModel = Model<ApiKeyType, object, ApiKeyInstanceMethods>;
+
+export type ApiKeyDocument = HydratedDocument<ApiKeyType, ApiKeyInstanceMethods>;
 
 /**
  * MongoDB schema for API keys
  * Each API key belongs to a client and is used for authentication
  */
-const apiKeySchema = new Schema(
+const apiKeySchema = new Schema<
+  ApiKeyType,
+  ApiKeyModel,
+  ApiKeyInstanceMethods
+>(
   {
     keyId: {
       type: String,
@@ -141,6 +197,6 @@ apiKeySchema.methods.isExpired = function () {
   return new Date(this.expiresAt) < new Date();
 };
 
-const ApiKey = model("ApiKey", apiKeySchema);
+const ApiKey = model<ApiKeyType, ApiKeyModel>("ApiKey", apiKeySchema);
 
 export default ApiKey;

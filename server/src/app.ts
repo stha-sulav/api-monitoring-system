@@ -11,6 +11,7 @@ import ApiResponse from "./shared/utils/apiResponse";
 import logger from "./shared/utils/logger";
 
 import authRouter from "./services/auth/routes/auth.router";
+import clientRouter from "./services/client/routes/client.router";
 
 function createApp() {
   const app = express();
@@ -49,13 +50,8 @@ function createApp() {
     );
   });
 
-  app.get("/", (_req: Request, res: Response) => {
-    res
-      .status(200)
-      .json(ApiResponse.success({ message: "Api Monitoring Service" }));
-  });
-
   app.use("/api/auth", authRouter);
+  app.use("/api", clientRouter);
 
   //   error middlewares
   app.use(errorHandler);

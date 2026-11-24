@@ -16,7 +16,11 @@ export class AuthController {
     this.authService = authService;
   }
 
-  async onboardSuperAdmin(req: Request, res: Response, next: NextFunction) {
+  async onboardSuperAdmin(
+    req: Request<{}, {}, { username: string; email: string; password: string }>,
+    res: Response,
+    next: NextFunction,
+  ) {
     try {
       const { username, email, password } = req.body;
 

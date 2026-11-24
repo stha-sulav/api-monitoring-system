@@ -1,13 +1,13 @@
 // src/types/express.d.ts
-import { JwtPayload } from "jsonwebtoken";
-import { USER_ROLES } from "../constants/shared.constant";
+import type { JwtPayload } from "jsonwebtoken";
+import type { USER_ROLES } from "../constants/shared.constant";
 
 export interface IUserPayload extends JwtPayload {
   userId: string;
   email: string;
   username: string;
   role: USER_ROLES;
-  clientId: string;
+  clientId?: string;
 }
 
 declare global {

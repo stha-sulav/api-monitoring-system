@@ -1,15 +1,15 @@
-import type { HydratedDocument, Model } from "mongoose";
-import { CreateDTO, IBaseAuthRepository } from "../auth.types";
-import { UserType } from "../../../shared/database/models/User";
+import type { Model } from "mongoose";
+import type { CreateDTO, IBaseAuthRepository } from "../auth.types";
+import type { UserDocument, UserType } from "../../../shared/database/models/User";
 import { USER_ROLES } from "../../../shared/constants/shared.constant";
 import logger from "../../../shared/utils/logger";
 
-export default class MongoUserRepository implements IBaseAuthRepository<UserType> {
+export default class MongoUserRepository
+  implements IBaseAuthRepository<UserType>
+{
   constructor(private readonly model: Model<UserType>) {}
 
-  async create(
-    userData: CreateDTO<UserType>,
-  ): Promise<HydratedDocument<UserType>> {
+  async create(userData: CreateDTO<UserType>): Promise<UserDocument> {
     try {
       const data = { ...userData };
 
@@ -36,7 +36,7 @@ export default class MongoUserRepository implements IBaseAuthRepository<UserType
     }
   }
 
-  async findById(id: string): Promise<UserType | null> {
+  async findById(id: string): Promise<UserDocument | null> {
     try {
       const user = await this.model.findById(id);
       return user;
@@ -46,7 +46,7 @@ export default class MongoUserRepository implements IBaseAuthRepository<UserType
     }
   }
 
-  async findByUsername(username: string): Promise<UserType | null> {
+  async findByUsername(username: string): Promise<UserDocument | null> {
     try {
       const user = await this.model.findOne({
         username,
@@ -58,7 +58,7 @@ export default class MongoUserRepository implements IBaseAuthRepository<UserType
     }
   }
 
-  async findByEmail(email: string): Promise<UserType | null> {
+  async findByEmail(email: string): Promise<UserDocument | null> {
     try {
       const user = await this.model.findOne({ email });
       return user;
@@ -68,7 +68,7 @@ export default class MongoUserRepository implements IBaseAuthRepository<UserType
     }
   }
 
-  async findAll(): Promise<UserType[]> {
+  async findAll(): Promise<UserDocument[]> {
     try {
       const users = await this.model
         .find({ isActive: true })

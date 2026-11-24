@@ -1,11 +1,35 @@
-import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
+import { model, Schema, type Types } from "mongoose";
 import { HTTP_VERB } from "../../constants/shared.constant";
+
+/**
+ * Plain data shape stored in MongoDB.
+ * Use `ApiHitDocument` when you need a hydrated Mongoose instance.
+ */
+export interface ApiHitType {
+  eventId: string;
+  timestamp: Date;
+  serviceName: string;
+  endpoint: string;
+  /** Stored values are the enum member names, e.g. "GET", not the numeric values. */
+  method: keyof typeof HTTP_VERB;
+  statusCode: number;
+  latencyMs: number;
+  clientId: Types.ObjectId;
+  apiKeyId: Types.ObjectId;
+  ip: string;
+  userAgent: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type ApiHitDocument = HydratedDocument<ApiHitType>;
 
 /**
  * MongoDB schema for raw API hit events
  * Stores every individual API call
  */
-const apiHitSchema = new Schema(
+const apiHitSchema = new Schema<ApiHitType>(
   {
     eventId: {
       type: String,
@@ -74,6 +98,6 @@ apiHitSchema.index({ clientId: 1, timestamp: -1, statusCode: 1 });
 apiHitSchema.index({ apiKeyId: 1, timestamp: -1 });
 apiHitSchema.index({ timestamp: 1 }, { expireAfterSeconds: 2592000 });
 
-const ApiHit = model("ApiHit", apiHitSchema);
+const ApiHit = model<ApiHitType>("ApiHit", apiHitSchema);
 
 export default ApiHit;
