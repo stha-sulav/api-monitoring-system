@@ -105,6 +105,12 @@ const userSchema = new Schema<UserType>(
   {
     timestamps: true,
     collection: "users",
+    toJSON: {
+      transform: (_doc, ret) => {
+        delete (ret as Partial<UserType>).password;
+        return ret;
+      },
+    },
   },
 );
 

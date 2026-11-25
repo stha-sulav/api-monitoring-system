@@ -2,21 +2,32 @@ import { Types } from "mongoose";
 import { ClientType } from "../../../shared/database/models/Client";
 import AppError from "../../../shared/utils/AppError";
 import logger from "../../../shared/utils/logger";
-import MongoUserRepository from "../../auth/repository/user.repository";
-import MongoApiKeyRepository from "../repository/apikey.repository";
-import MongoClientRepository from "../repository/client.repository";
-import { UserType } from "../../../shared/database/models/User";
+import type {
+  UserDocument,
+  UserType,
+} from "../../../shared/database/models/User";
 import {
   APP_ENVIRONMENT,
   USER_ROLES,
 } from "../../../shared/constants/shared.constant";
 import SecurityUtils from "../../../shared/utils/security.utils";
-import { IUserPayload } from "../../../shared/types/express";
+import type { IUserPayload } from "../../../shared/types/express";
+import { v4 } from "uuid";
+import crypto from "node:crypto";
+import type {
+  ApiKeyType,
+  CreateApiKeyInput,
+} from "../../../shared/database/models/ApiKey";
+import type {
+  IBaseApiKeyRepository,
+  IBaseClientRepository,
+} from "../client.types";
+import type { IBaseAuthRepository } from "../../auth/auth.types";
 
 export type ClientServiceDependencies = {
-  clientRepository: MongoClientRepository;
-  apikeyRepository: MongoApiKeyRepository;
-  userRepository: MongoUserRepository;
+  clientRepository: IBaseClientRepository<ClientType>;
+  apikeyRepository: IBaseApiKeyRepository<ApiKeyType, CreateApiKeyInput>;
+  userRepository: IBaseAuthRepository<UserType>;
 };
 
 /**
@@ -30,8 +41,12 @@ export type CreateClientInput = Omit<
 >;
 
 export class ClientService {
-  private readonly clientRepository: MongoClientRepository;
-  private readonly userRepository: MongoUserRepository;
+  private readonly clientRepository: IBaseClientRepository<ClientType>;
+  private readonly userRepository: IBaseAuthRepository<UserType>;
+  private readonly apiKeyRepository: IBaseApiKeyRepository<
+    ApiKeyType,
+    CreateApiKeyInput
+  >;
 
   constructor(dependencies: ClientServiceDependencies) {
     if (!dependencies) {
@@ -39,19 +54,20 @@ export class ClientService {
     }
 
     if (!dependencies.clientRepository) {
-      throw new Error("Client repository dependencies are required");
+      throw new Error("Client Repository dependencies are required");
     }
 
     if (!dependencies.apikeyRepository) {
-      throw new Error("ApkkeyRepository is required");
+      throw new Error("Apikey Repository is required");
     }
 
     if (!dependencies.userRepository) {
-      throw new Error("UserRepository is required");
+      throw new Error("User Repository is required");
     }
 
     this.clientRepository = dependencies.clientRepository;
     this.userRepository = dependencies.userRepository;
+    this.apiKeyRepository = dependencies.apikeyRepository;
   }
 
   private generateSlug(name: string) {
@@ -71,9 +87,15 @@ export class ClientService {
     return user.clientId && user.clientId.toString() === clientId;
   }
 
-  private formatClientForResposne(user: UserType) {
-    const { password, ...userData } = user;
+  private formatClientForResposne(user: UserDocument) {
+    const { password: _password, ...userData } = user.toObject();
     return userData;
+  }
+
+  private generateApiKey() {
+    const prefix = "apim";
+    const randomBytes = crypto.randomBytes(20).toString("hex");
+    return `${prefix}_${randomBytes}`;
   }
 
   async getAllCleints() {
@@ -144,7 +166,7 @@ export class ClientService {
         });
       }
 
-      const client = this.clientRepository.findById(clientId);
+      const client = await this.clientRepository.findById(clientId);
 
       if (!client) {
         throw new AppError({
@@ -212,7 +234,7 @@ export class ClientService {
   }: {
     clientId: string;
     userData: IUserPayload;
-    data: any;
+    data: Omit<CreateApiKeyInput, "keyId" | "keyName">;
   }) {
     try {
       if (!Types.ObjectId.isValid(clientId)) {
@@ -222,19 +244,19 @@ export class ClientService {
         });
       }
 
-      const client = this.clientRepository.findById(clientId);
+      if (!this.canUserAccessClient(userData, clientId)) {
+        throw new AppError({
+          message: "Access Denied",
+          statusCode: 403,
+        });
+      }
+
+      const client = await this.clientRepository.findById(clientId);
 
       if (!client) {
         throw new AppError({
           message: "Client not found",
           statusCode: 404,
-        });
-      }
-
-      if (!this.canUserAccessClient(userData, clientId)) {
-        throw new AppError({
-          message: "Access Denied",
-          statusCode: 403,
         });
       }
 
@@ -251,6 +273,62 @@ export class ClientService {
       }
 
       data.environment ??= APP_ENVIRONMENT.PRODUCTION;
+
+      const keyId = v4();
+      const keyValue = this.generateApiKey();
+
+      const apiKey = await this.apiKeyRepository.create({
+        ...data,
+        keyId,
+        keyValue,
+        clientId: new Types.ObjectId(clientId),
+        createdBy: new Types.ObjectId(userData.userId),
+      });
+      return apiKey;
+    } catch (error) {
+      logger.error("Failed to create APi key: ", error);
+      throw error;
+    }
+  }
+
+  async getApiKey({
+    clientId,
+    userData,
+  }: {
+    clientId: string;
+    userData: IUserPayload;
+  }) {
+    try {
+      if (!Types.ObjectId.isValid(clientId)) {
+        throw new AppError({
+          message: "Invalid client id",
+          statusCode: 400,
+        });
+      }
+
+      if (!this.canUserAccessClient(userData, clientId)) {
+        throw new AppError({
+          message: "Access Denied",
+          statusCode: 403,
+        });
+      }
+
+      const client = await this.clientRepository.findById(clientId);
+
+      if (!client) {
+        throw new AppError({
+          message: "Client not found",
+          statusCode: 404,
+        });
+      }
+
+      const apiKeys = await this.apiKeyRepository.findByClientId({ clientId });
+
+      const formattedResponse = apiKeys.map((key) => {
+        const { keyValue: _keyValue, ...keyData } = key.toObject();
+        return keyData;
+      });
+      return formattedResponse;
     } catch (error) {
       logger.error("Failed to create APi key: ", error);
       throw error;

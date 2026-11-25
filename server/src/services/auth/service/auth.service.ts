@@ -6,16 +6,20 @@ import type {
 import AppError from "../../../shared/utils/AppError";
 import config from "../../../shared/config";
 import logger from "../../../shared/utils/logger";
-import type MongoUserRepository from "../repository/user.repository";
 import type { UserLoginType, UserRegistrationType } from "../schemas/user.schema";
 import bcrypt from "bcryptjs";
 import { USER_ROLES } from "../../../shared/constants/shared.constant";
-import type { CreateDTO, JwtPayload, UserResponse } from "../auth.types";
+import type {
+  CreateDTO,
+  IBaseAuthRepository,
+  JwtPayload,
+  UserResponse,
+} from "../auth.types";
 
 export class AuthService {
-  private userRepository: MongoUserRepository;
+  private readonly userRepository: IBaseAuthRepository<UserType>;
 
-  constructor(userRepository: MongoUserRepository) {
+  constructor(userRepository: IBaseAuthRepository<UserType>) {
     if (!userRepository) {
       throw new Error("User repository is required");
     }
@@ -39,7 +43,7 @@ export class AuthService {
   }
 
   private formatUserResponse(user: UserDocument): UserResponse {
-    const { password: _password, ...cleanUserObj } = user;
+    const { password: _password, ...cleanUserObj } = user.toObject();
     return cleanUserObj;
   }
 

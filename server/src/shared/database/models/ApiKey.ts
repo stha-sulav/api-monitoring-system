@@ -51,17 +51,16 @@ export type CreateApiKeyInput = Omit<ApiKeyType, "createdAt" | "updatedAt">;
 
 export type ApiKeyModel = Model<ApiKeyType, object, ApiKeyInstanceMethods>;
 
-export type ApiKeyDocument = HydratedDocument<ApiKeyType, ApiKeyInstanceMethods>;
+export type ApiKeyDocument = HydratedDocument<
+  ApiKeyType,
+  ApiKeyInstanceMethods
+>;
 
 /**
  * MongoDB schema for API keys
  * Each API key belongs to a client and is used for authentication
  */
-const apiKeySchema = new Schema<
-  ApiKeyType,
-  ApiKeyModel,
-  ApiKeyInstanceMethods
->(
+const apiKeySchema = new Schema<ApiKeyType, ApiKeyModel, ApiKeyInstanceMethods>(
   {
     keyId: {
       type: String,

@@ -39,9 +39,9 @@ export enum HTTP_VERB {
 }
 
 export enum ERRORS {
-  UnhandeledError,
-  ValidationError,
-  MongoServerError,
-  JsonWebTokenError,
-  TokenExpiredError,
+  UnhandeledError = "UnhandeledError",
+  ValidationError = "ValidationError",
+  MongoServerError = "MongoServerError",
+  JsonWebTokenError = "JsonWebTokenError",
+  TokenExpiredError = "TokenExpiredError",
 }

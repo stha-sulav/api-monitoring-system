@@ -1,19 +1,15 @@
-import ApiKey from "../../../shared/database/models/ApiKey";
-import Client from "../../../shared/database/models/Client";
-import User from "../../../shared/database/models/User";
-import { authDependencies } from "../../auth/dependencies/auth.dependency";
-import MongoUserRepository from "../../auth/repository/user.repository";
+import userRepository from "../../auth/repository/user.repository";
 import { ClientController } from "../controller/clinet.controller";
-import MongoApiKeyRepository from "../repository/apikey.repository";
-import MongoClientRepository from "../repository/client.repository";
+import apiKeyRepository from "../repository/apikey.repository";
+import clientRepository from "../repository/client.repository";
 import { ClientService } from "../service/client.service";
 
 export class ClientDependencyContainer {
   static init() {
     const repositories = {
-      clientRepository: new MongoClientRepository(Client),
-      apiKeyRepository: new MongoApiKeyRepository(ApiKey),
-      userRepository: new MongoUserRepository(User),
+      clientRepository,
+      apiKeyRepository,
+      userRepository,
     };
 
     const services = {
@@ -25,10 +21,7 @@ export class ClientDependencyContainer {
     };
 
     const controllers = {
-      clientController: new ClientController(
-        services.clientService,
-        authDependencies.services.authService,
-      ),
+      clientController: new ClientController(services.clientService),
     };
 
     return { repositories, services, controllers };

@@ -18,7 +18,7 @@ async function initializeConnection() {
 
     logger.info("All connection established successfully");
   } catch (error) {
-    logger.info("Failed to inilize connection: ", error);
+    logger.error("Failed to initialize connections", error);
     throw error;
   }
 }
@@ -73,7 +73,10 @@ async function startServer() {
       logger.error("Unhandled Rejection: ", error);
       gracefulShutdown("unhandledRejection", server);
     });
-  } catch (error) {}
+  } catch (error) {
+    logger.error("Failed to start server", error);
+    process.exit(1);
+  }
 }
 
 startServer();

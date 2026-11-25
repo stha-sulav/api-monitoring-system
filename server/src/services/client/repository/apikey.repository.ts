@@ -1,10 +1,10 @@
 import { Types } from "mongoose";
 import type { QueryFilter } from "mongoose";
-import type {
-  ApiKeyDocument,
-  ApiKeyModel,
-  ApiKeyType,
-  CreateApiKeyInput,
+import ApiKey, {
+  type ApiKeyDocument,
+  type ApiKeyModel,
+  type ApiKeyType,
+  type CreateApiKeyInput,
 } from "../../../shared/database/models/ApiKey";
 import type {
   ClientIdFilterProps,
@@ -13,7 +13,7 @@ import type {
 } from "../client.types";
 import logger from "../../../shared/utils/logger";
 
-export default class MongoApiKeyRepository
+export class MongoApiKeyRepository
   implements IBaseApiKeyRepository<ApiKeyType, CreateApiKeyInput>
 {
   constructor(private readonly model: ApiKeyModel) {}
@@ -90,3 +90,5 @@ export default class MongoApiKeyRepository
     }
   }
 }
+
+export default new MongoApiKeyRepository(ApiKey);

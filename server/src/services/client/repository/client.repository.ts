@@ -1,12 +1,12 @@
 import type { Model, QueryFilter } from "mongoose";
-import type {
-  ClientDocument,
-  ClientType,
+import Client, {
+  type ClientDocument,
+  type ClientType,
 } from "../../../shared/database/models/Client";
 import type { ClientFindOptions, IBaseClientRepository } from "../client.types";
 import logger from "../../../shared/utils/logger";
 
-export default class MongoClientRepository implements IBaseClientRepository<ClientType> {
+export class MongoClientRepository implements IBaseClientRepository<ClientType> {
   constructor(private readonly model: Model<ClientType>) {}
 
   async create(
@@ -90,3 +90,5 @@ export default class MongoClientRepository implements IBaseClientRepository<Clie
     }
   }
 }
+
+export default new MongoClientRepository(Client);

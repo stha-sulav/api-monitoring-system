@@ -1,39 +1,20 @@
 import { NextFunction, Request, Response } from "express";
-import { AuthService } from "../../auth/service/auth.service";
 import { ClientService } from "../service/client.service";
 import ApiResponse from "../../../shared/utils/apiResponse";
 
 export class ClientController {
   private readonly clientService: ClientService;
-  private readonly authService: AuthService;
 
-  constructor(clientService: ClientService, authService: AuthService) {
+  constructor(clientService: ClientService) {
     if (!clientService) {
       throw new Error("ClientService is required");
     }
 
-    if (!authService) {
-      throw new Error("AuthService is required");
-    }
-
     this.clientService = clientService;
-    this.authService = authService;
   }
 
-  async getAllClients(req: Request, res: Response, next: NextFunction) {
+  async getAllClients(_req: Request, res: Response, next: NextFunction) {
     try {
-      const isSuperAdmin = await this.authService.checkSuperAdminPermission(
-        req.user?.userId!,
-      );
-
-      if (!isSuperAdmin) {
-        return res
-          .status(403)
-          .json(
-            ApiResponse.error({ message: "Access denied", statusCode: 403 }),
-          );
-      }
-
       const clients = await this.clientService.getAllCleints();
       return res.status(200).json(
         ApiResponse.success({
@@ -49,18 +30,6 @@ export class ClientController {
 
   async createClient(req: Request, res: Response, next: NextFunction) {
     try {
-      const isSuperAdmin = await this.authService.checkSuperAdminPermission(
-        req.user?.userId!,
-      );
-
-      if (!isSuperAdmin) {
-        return res
-          .status(403)
-          .json(
-            ApiResponse.error({ message: "Access denied", statusCode: 403 }),
-          );
-      }
-
       const client = await this.clientService.createClient({
         clientData: req.body,
         userId: req.user?.userId!,
@@ -122,6 +91,31 @@ export class ClientController {
         ApiResponse.success({
           data: apiKey,
           message: "Api key created successfully",
+          statusCode: 201,
+        }),
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async getApiKey(
+    req: Request<{ clientId: string }>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { clientId } = req.params;
+
+      const apiKey = await this.clientService.getApiKey({
+        clientId,
+        userData: req.user!,
+      });
+
+      return res.status(200).json(
+        ApiResponse.success({
+          data: apiKey,
+          message: "Api key fetched successfully",
           statusCode: 201,
         }),
       );

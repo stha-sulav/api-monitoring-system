@@ -9,23 +9,25 @@ function errorHandler(
   res: Response,
   _next: NextFunction,
 ): void {
-  let statusCode = req.statusCode || 500;
-  let message = err.message || "Internal server error";
-  let errors = err.errors || null;
+  let statusCode: number = err.statusCode ?? 500;
+  let message: string = err.message || "Internal server error";
+  let errors = err.errors ?? null;
 
-  logger.error("Unhandeled Error", {
+  logger.error("Unhandled Error", {
     message,
     statusCode,
     stack: err.stack,
-    path: err.path,
+    path: req.path,
     method: req.method,
   });
 
-  switch (message) {
+  switch (err.name) {
     case ERRORS.ValidationError:
       statusCode = 400;
       message = "Validation Error";
-      errors = Object.values(errors).map((e: any) => e.message);
+      if (errors) {
+        errors = Object.values(errors).map((e: any) => e.message);
+      }
       break;
     case ERRORS.MongoServerError:
       if (err.code === 11000) {

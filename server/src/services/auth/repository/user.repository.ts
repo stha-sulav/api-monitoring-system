@@ -1,12 +1,13 @@
 import type { Model } from "mongoose";
 import type { CreateDTO, IBaseAuthRepository } from "../auth.types";
-import type { UserDocument, UserType } from "../../../shared/database/models/User";
+import User, {
+  type UserDocument,
+  type UserType,
+} from "../../../shared/database/models/User";
 import { USER_ROLES } from "../../../shared/constants/shared.constant";
 import logger from "../../../shared/utils/logger";
 
-export default class MongoUserRepository
-  implements IBaseAuthRepository<UserType>
-{
+export class MongoUserRepository implements IBaseAuthRepository<UserType> {
   constructor(private readonly model: Model<UserType>) {}
 
   async create(userData: CreateDTO<UserType>): Promise<UserDocument> {
@@ -80,3 +81,5 @@ export default class MongoUserRepository
     }
   }
 }
+
+export default new MongoUserRepository(User);
