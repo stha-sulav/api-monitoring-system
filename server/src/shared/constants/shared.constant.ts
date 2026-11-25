@@ -1,7 +1,12 @@
-export enum USER_ROLES {
-  SUPER_ADMIN = "super_admin",
+export enum CLIENT_ROLES {
   CLIENT_ADMIN = "client_admin",
   CLINET_VIWER = "client_viwer",
+}
+
+export enum USER_ROLES {
+  SUPER_ADMIN = "super_admin",
+  CLIENT_ADMIN = CLIENT_ROLES.CLIENT_ADMIN,
+  CLINET_VIWER = CLIENT_ROLES.CLINET_VIWER,
 }
 
 export const WEAK_PASSWORDS = [

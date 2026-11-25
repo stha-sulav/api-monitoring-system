@@ -1,4 +1,4 @@
-import { WEAK_PASSWORDS } from "../constants/shared.constant";
+import { CLIENT_ROLES, WEAK_PASSWORDS } from "../constants/shared.constant";
 
 class SecurityUtils {
   static PASSWORD_REQUIREMENTS = {
@@ -52,6 +52,10 @@ class SecurityUtils {
       success: errors.length === 0,
       errors,
     };
+  }
+
+  static isRoleValid(role: string) {
+    return Object.values(CLIENT_ROLES).includes(role as CLIENT_ROLES);
   }
 }
 
